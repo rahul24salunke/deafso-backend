@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id         Int      @id @default(autoincrement())
+  fullname   String
+  email      String   @unique
+  mobile     String
+  password   String
+  standard   String
+  division   String
+  rollnumber String   @unique
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  sessions StudentSession[]
+
+  // Indexes
+  @@index([email])
+  @@index([rollnumber])
+  @@index([standard, division])
+  @@map("students")
+}
+
+model Teacher {
+  id        Int      @id @default(autoincrement())
+  fullname  String
+  email     String   @unique
+  mobile    String
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjects Subject[]
+  sessions TeacherSession[]
+  @@map("teachers")
+}
+
+model Subject {
+  id          Int      @id @default(autoincrement())
+  subjectName String   @map("subjectName")
+  standard    String
+  division    String
+  duration    Int      @default(0)
+  views       Int      @default(0)
+  content     String?
+  teacherId   Int?     @map("teacher_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  teacher Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([standard, division])
+  @@index([subjectName])
+  @@unique([subjectName, standard, division])
+  @@map("subjects")
+}
+
+model StudentSession {
+  id        Int      @id @default(autoincrement())
+  studentId Int      @map("student_id")
+  token     String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([studentId])
+  @@index([token])
+  @@map("student_sessions")
+}
+
+model TeacherSession {
+  id        Int      @id @default(autoincrement())
+  teacherId Int      @map("teacher_id")
+  token     String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([teacherId])
+  @@index([token])
+  @@map("teacher_sessions")
+} 
