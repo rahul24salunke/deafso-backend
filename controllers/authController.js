@@ -133,19 +133,21 @@ const studentLogin = async (req, res) => {
     // Store token in database
     await storeToken(student.id, token, 'student');
 
-    res.status(200).json({
-      success: true,
-      message: 'Student logged in successfully',
-      data: {
-        id: student.id,
+    const user={
+      id: student.id,
         fullname: student.fullname,
         email: student.email,
         mobile: student.mobile,
         standard: student.standard,
         division: student.division,
         rollnumber: student.rollnumber
-      },
-      token
+    }
+
+    res.status(200).cookie("token",token,{maxAge:1*24*60*60*1000,httpOnly:true,sameSite:'lax'}).json({
+      success: true,
+      user,
+      message: 'Student logged in successfully',
+      
     });
   } catch (error) {
     console.error('Student login error:', error);
@@ -244,17 +246,17 @@ const teacherLogin = async (req, res) => {
 
     // Store token in database
     await storeToken(teacher.id, token, 'teacher');
-
-    res.status(200).json({
-      success: true,
-      message: 'Teacher logged in successfully',
-      data: {
-        id: teacher.id,
+    const user={
+      id: teacher.id,
         fullname: teacher.fullname,
         email: teacher.email,
         mobile: teacher.mobile
-      },
-      token
+    }
+
+    res.status(200).cookie("token",token,{maxAge:1*24*60*60*1000,httpsOnly:true,sameSite:'lax'}).json({
+      success: true,
+      message: 'Teacher logged in successfully',
+      user
     });
   } catch (error) {
     console.error('Teacher login error:', error);
